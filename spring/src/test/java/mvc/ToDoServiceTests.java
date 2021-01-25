@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ToDoServiceTest {
+public class ToDoServiceTests {
     @Mock
     private ToDoListRepository toDoListRepository;
     @Mock
@@ -37,6 +37,7 @@ public class ToDoServiceTest {
         final ToDoTask task = new ToDoTask();
 
         when(toDoListRepository.getOne(eq(list.getId()))).thenReturn(list);
+        when(toDoTaskRepository.save(any())).then(i -> i.getArgument(0));
 
         toDoService.addTask(list.getId(), task);
 

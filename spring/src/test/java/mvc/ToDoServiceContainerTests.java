@@ -3,6 +3,7 @@ package mvc;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -20,6 +21,7 @@ import mvc.repository.ToDoTaskRepository;
 import mvc.service.ToDoService;
 
 @SpringBootTest
+@ContextConfiguration(initializers = ToDoServiceContainerTests.Initializer.class)
 @Testcontainers
 public class ToDoServiceContainerTests {
     @Autowired
@@ -32,9 +34,9 @@ public class ToDoServiceContainerTests {
 
     @ClassRule
     @Container
-    private static final PostgreSQLContainer postgreSQLContainer =
-            new PostgreSQLContainer<>("postgres:12.4").withDatabaseName("postgres")
-                    .withUsername("postgresql").withPassword("admin");
+    private static final PostgreSQLContainer<?> postgreSQLContainer =
+            new PostgreSQLContainer<>("postgres:12.4").withDatabaseName("psql-db")
+                    .withUsername("postgres").withPassword("admin");
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
@@ -42,7 +44,8 @@ public class ToDoServiceContainerTests {
             TestPropertyValues.of(
                     String.format("spring.datasource.url=%s", postgreSQLContainer.getJdbcUrl()),
                     String.format("spring.datasource.username=%s", postgreSQLContainer.getUsername()),
-                    String.format("spring.datasource.password=%s", postgreSQLContainer.getPassword())
+                    String.format("spring.datasource.password=%s", postgreSQLContainer.getPassword()),
+                    String.format("spring.datasource.driver-class-name=%s", postgreSQLContainer.getDriverClassName())
             ).applyTo(ac.getEnvironment());
         }
     }
