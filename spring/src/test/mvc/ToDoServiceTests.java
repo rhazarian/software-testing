@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ToDoServiceTests {
+public class ToDoServiceTest {
     @Mock
     private ToDoListRepository toDoListRepository;
     @Mock
