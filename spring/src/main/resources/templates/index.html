@@ -1,0 +1,57 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head>
+    <title>To-Do Lists</title>
+</head>
+<body>
+<h2>Lists</h2>
+<th:block th:each="list : ${lists}">
+    <h3 th:text="${list.getName()}"></h3>
+    <table>
+        <tr th:each="task : ${list.getTasks()}">
+            <td>
+                <span th:if="${task.isDone()}" style="text-decoration: line-through;"
+                      th:text="${task.getName()}"></span>
+                <span th:unless="${task.isDone()}" th:text="${task.getName()}"></span>
+            </td>
+            <td th:unless="${task.isDone()}">
+                <form action="/mark-task" method="post">
+                    <input type="hidden" th:name="id" th:value="${task.getId()}">
+                    <input type="submit" value="mark done">
+                </form>
+            </td>
+        </tr>
+    </table>
+    <form action="/remove-list" method="post">
+        <input type="hidden" th:name="id" th:value="${list.getId()}">
+        <input type="submit" value="remove list" data-test-id="list_remove-submit">
+    </form>
+    <h4>Add new task</h4>
+    <form th:object="${task}" action="/add-task" method="post">
+        <input type="hidden" th:name="list-id" th:value="${list.getId()}">
+        <table>
+            <tr>
+                <td><label>Name:</label></td>
+                <td><label>
+                    <input type="text" th:field="*{name}"/>
+                </label></td>
+            </tr>
+        </table>
+        <input type="submit" value="add task">
+    </form>
+</th:block>
+<hr/>
+<h2>Add new list</h2>
+<form th:object="${list}" action="/add-list" method="post">
+    <table>
+        <tr>
+            <td><label>Name:</label></td>
+            <td><label>
+                <input type="text" th:field="*{name}" data-test-id="add-list_name-input"/>
+            </label></td>
+        </tr>
+    </table>
+    <input type="submit" value="add" data-test-id="add-list_submit">
+</form>
+</body>
+</html>
