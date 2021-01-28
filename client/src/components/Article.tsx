@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useContext} from 'react';
+import AuthContext from "../helpers/auth-context";
 
 export interface ArticleData {
     id: number;
@@ -10,8 +11,11 @@ export interface ArticleData {
 export default function Article({article}: {
     article: ArticleData
 }) {
+    const authContext = useContext(AuthContext);
+
     const onClick = () => fetch(`http://89.179.122.237:8000/articles/${article.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: authContext.authHeader()
     }).then(() => {
         window.location.reload();
     }).catch(alert);

@@ -8,6 +8,17 @@ describe('e2e-cypress', () => {
     let unimportantArticle: ArticleData;
     let importantArticle: ArticleData;
 
+    Cypress.Commands.overwrite('request', (orig, method, url, body) => {
+        return orig({
+            method: method,
+            url: url,
+            body: body,
+            headers: {
+                'Authorization': `basic ${btoa(`system:admin`)}`
+            }
+        });
+    });
+
     before(() => {
         cy.request('POST', 'http://89.179.122.237:8000/articles/', {
             title: randomId(),
@@ -26,8 +37,16 @@ describe('e2e-cypress', () => {
         cy.request('DELETE', `http://89.179.122.237:8000/articles/${importantArticle.id}`);
     });
 
-    it('unimportant articles display only when important is unchecked', () => {
+    beforeEach(() => {
         cy.visit('http://89.179.122.237:3000/');
+        window.localStorage.setItem('REACT_USER', JSON.stringify({
+            authdata: window.btoa('system:admin'),
+            id: 0
+        }));
+        cy.reload();
+    });
+
+    it('unimportant articles display only when important is unchecked', () => {
         cy.get('[data-test-id=only_important_input]').uncheck();
         cy.contains(unimportantArticle.title);
         cy.get('[data-test-id=only_important_input]').check();
@@ -35,7 +54,6 @@ describe('e2e-cypress', () => {
     });
 
     it('important articles always display', () => {
-        cy.visit('http://89.179.122.237:3000/');
         cy.get('[data-test-id=only_important_input]').uncheck();
         cy.contains(importantArticle.title);
         cy.get('[data-test-id=only_important_input]').check();

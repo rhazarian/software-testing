@@ -2,8 +2,12 @@ import 'isomorphic-fetch';
 import {chromium, Browser, Page} from 'playwright'
 import {ArticleData} from "../../src/components/Article";
 
+const btoa = require('btoa');
+
 describe('e2e-playwright', () => {
     const randomId = () => `uuid-${((new Date()).getTime().toString(16))}${Math.floor(1E7 * Math.random()).toString(16)}`;
+
+    const authHeader =  {'Authorization': `basic ${btoa('system:admin')}`};
 
     let unimportantArticle: ArticleData;
     let importantArticle: ArticleData;
@@ -15,9 +19,9 @@ describe('e2e-playwright', () => {
         browser = await chromium.launch();
         await fetch('http://89.179.122.237:8000/articles/', {
             method: 'POST',
-            headers: {
+            headers: Object.assign({
                 'Content-type': 'application/json;charset=utf-8'
-            },
+            }, authHeader),
             body: JSON.stringify({
                 title: randomId(),
                 text: randomId(),
@@ -26,9 +30,9 @@ describe('e2e-playwright', () => {
         }).then(response => response.json()).then(article => unimportantArticle = article);
         await fetch('http://89.179.122.237:8000/articles/', {
             method: 'POST',
-            headers: {
+            headers: Object.assign({
                 'Content-type': 'application/json;charset=utf-8'
-            },
+            }, authHeader),
             body: JSON.stringify({
                 title: randomId(),
                 text: randomId(),
@@ -38,15 +42,24 @@ describe('e2e-playwright', () => {
     });
     afterAll(async () => {
         await fetch(`http://89.179.122.237:8000/articles/${unimportantArticle.id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: authHeader
         });
         await fetch(`http://89.179.122.237:8000/articles/${importantArticle.id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: authHeader
         });
         await browser.close();
     });
     beforeEach(async () => {
         page = await browser.newPage();
+        await page.goto('http://localhost:3000');
+        await page.evaluate(() => window.localStorage.setItem('REACT_USER', JSON.stringify({
+            authdata: window.btoa('system:admin'),
+            id: 0
+        })));
+        await page.reload();
+        await page.waitForLoadState();
     });
     afterEach(async () => {
         await page.close();
@@ -97,7 +110,8 @@ describe('e2e-playwright', () => {
             .then(titleElement => titleElement?.$('xpath=..'))
             .then(articleElement => articleElement?.getAttribute('data-id'));
         await fetch(`http://89.179.122.237:8000/articles/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: authHeader
         });
     });
 
@@ -126,7 +140,8 @@ describe('e2e-playwright', () => {
             .then(titleElement => titleElement?.$('xpath=..'))
             .then(articleElement => articleElement?.getAttribute('data-id'));
         await fetch(`http://89.179.122.237:8000/articles/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: authHeader
         });
     });
 
@@ -136,9 +151,9 @@ describe('e2e-playwright', () => {
 
         await fetch('http://89.179.122.237:8000/articles/', {
             method: 'POST',
-            headers: {
+            headers: Object.assign({
                 'Content-type': 'application/json;charset=utf-8'
-            },
+            }, authHeader),
             body: JSON.stringify({
                 title: title,
                 text: text,

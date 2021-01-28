@@ -1,20 +1,14 @@
 import React from 'react';
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
-import Home from "./components/Home";
-import Post from './components/Post';
-import './App.css';
-import Navigation from "./components/Navigation";
+import AuthProvider from "./components/AuthProvider";
+import AppView from "./components/AppView";
+import {BrowserRouter} from "react-router-dom";
 
-function App() {
+export default function App() {
     return (
-        <BrowserRouter>
-            <Navigation/>
-            <Switch>
-                <Route path="/post" id="post" component={Post}/>
-                <Route path="/" id="home" component={Home}/>
-            </Switch>
-        </BrowserRouter>
+        <AuthProvider>
+            <BrowserRouter>
+                <AppView/>
+            </BrowserRouter>
+        </AuthProvider>
     );
 }
-
-export default App;

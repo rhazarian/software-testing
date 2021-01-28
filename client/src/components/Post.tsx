@@ -1,16 +1,18 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {useForm} from "react-hook-form";
 import {useHistory} from "react-router-dom";
 import {ArticleData} from "./Article";
+import AuthContext from "../helpers/auth-context";
 
 export default function Post() {
     const {register, errors, handleSubmit} = useForm<ArticleData>();
+    const authContext = useContext(AuthContext);
     const history = useHistory();
     const onSubmit = (data: ArticleData) => fetch('http://89.179.122.237:8000/articles/', {
         method: 'POST',
-        headers: {
+        headers: Object.assign({
             'Content-type': 'application/json;charset=utf-8'
-        },
+        }, authContext.authHeader()),
         body: JSON.stringify(data)
     }).then(() => {
         history.push('/');
